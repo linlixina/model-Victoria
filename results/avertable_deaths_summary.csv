@@ -1,0 +1,8 @@
+"group","mean","lower","upper","avertable_mean","avertable_lower","avertable_upper"
+"Rate(Age<12)",1,1,1,0,0,0
+"Rate(12<=Age<16)",1,1,1,0,0,0
+"Rate(16=<V<50)",2,1,2,0,0,1
+"Rate(16=<UV<50)",18,15,20,6,4,9
+"Rate(V>=50)",174,137,219,21,-24,58
+"Rate(UV>=50)",277,209,365,114,26,182
+"Total",472,392,570,142,44,222
