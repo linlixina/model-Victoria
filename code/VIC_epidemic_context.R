@@ -5,7 +5,11 @@ library(readxl)
 library(dplyr)
 library(ggplot2)
 library(scales)
+library(sf)
+library(patchwork)
+library(mgcv)
 
+#Panel A
 file_path   <- "data/VIC_epidemic.xlsx"
 sheet1_name <- "Sheet1"
 sheet2_name <- "Sheet2"
@@ -131,11 +135,52 @@ p <- ggplot() +
   labs(x = NULL) +
   my_theme
 
-ggsave(
-  filename = "figures/Fig1.svg",
-  plot     = p,
-  width    = 6, height = 4,
-  units    = "in",
-  device   = "svg",
-  dpi      = 600
+
+
+#Panel B
+# Load the shapefile (replace 'path_to_shapefile' with the correct path to your downloaded file)
+victoria_lga <- st_read("data/GDA94/vic_lga.shp")
+
+# Updated list of LGAs to highlight
+lga_list <- lga_list <- c(
+  "Ararat Rural City", "Ballarat City", "Banyule City", "Bass Coast Shire", "Baw Baw Shire",
+  "Bayside City", "Benalla Rural City", "Boroondara City", "Brimbank City", "Campaspe Shire",
+  "Cardinia Shire", "Casey City", "Central Goldfields Shire", "Colac Otway Shire", "Corangamite Shire",
+  "Darebin City", "East Gippsland Shire", "Frankston City", "Gannawarra Shire", "Glen Eira City",
+  "Glenelg Shire", "Golden Plains Shire", "Greater Bendigo City", "Greater Dandenong City",
+  "Greater Geelong City", "Greater Shepparton City", "Hepburn Shire", "Hobsons Bay City",
+  "Hume City", "Indigo Shire", "Kingston City", "Knox City", "Latrobe City", "Macedon Ranges Shire",
+  "Manningham City", "Maribyrnong City", "Maroondah City", "Melbourne City", "Melton City",
+  "Mildura Rural City", "Mitchell Shire", "Moira Shire", "Monash City", "Moonee Valley City",
+  "Moorabool Shire", "Merri-Bek City", "Mornington Peninsula Shire", "Mount Alexander Shire",
+  "Moyne Shire", "Murrindindi Shire", "Nillumbik Shire", "Northern Grampians Shire",
+  "Port Phillip City", "South Gippsland Shire", "Stonnington City", "Strathbogie Shire",
+  "Surf Coast Shire", "Swan Hill Rural City", "Wangaratta Rural City", "Warrnambool City",
+  "Wellington Shire", "Whitehorse City", "Whittlesea City", "Wodonga City", "Wyndham City",
+  "Yarra City", "Yarra Ranges Shire"
 )
+
+victoria_lga$highlight <- ifelse(victoria_lga$LGA_NAME %in% lga_list, "Selected", "Other")
+
+map_plot <- ggplot(data = victoria_lga) +
+  geom_sf(aes(fill = highlight), color = "black") +
+  scale_fill_manual(values = c("Selected" = "lightblue", "Other" = "gray90")) +
+  theme_classic(base_size = 14) +
+  theme(
+    plot.title       = element_text(hjust = 0.5, face = "bold"),
+    legend.position  = c(0.85, 0.85),
+    legend.title     = element_blank(),
+    legend.text      = element_text(size = 11),
+    legend.key.size  = unit(0.5, "cm"),
+    legend.background= element_rect(fill = "white", color = NA),
+    axis.title       = element_blank(), 
+    axis.text        = element_text(size = 11)
+  )
+
+
+#plotting!!!
+combined <- (p + map_plot) + 
+  plot_annotation(tag_levels = "A") & 
+  theme(plot.tag = element_text(face = "bold", size = 16))
+
+ggsave("figures/Fig1.svg", combined, width = 11, height = 4.8, dpi = 600)
